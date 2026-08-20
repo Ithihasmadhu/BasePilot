@@ -25,7 +25,9 @@ position and rechecks instead of raiding for loot that would overflow.*
 
 **Farming.** Finds matches, deploys your army (Valkyries, Sneaky Goblins, Super
 Minions, or Edrags), collects loot, returns home, and recovers on its own from popups,
-disconnects, and stray screens. Builder Base farming included.
+disconnects, and stray screens. Builder Base farming included. See
+**[Armies and attack strategies](docs/armies.md)** for the recommended Valkyrie army and
+deploy-bar setup.
 
 **Auto upgrade (beta).** Reads the builder menu with OCR and spends your loot:
 
@@ -90,8 +92,9 @@ reopen Clash, then *Restore my display* — the running game keeps 16:9.
    Windows SmartScreen warns on first launch — *More info → Run anyway*.
 2. Open the game, then press **Test** on the Settings page to confirm BasePilot can see
    it. Use **Auto-detect** or pick the window manually if needed.
-3. On the Run page, choose your army, set **Auto upgrade → Dry run** for the first
-   session, and press **Start**. Watch the Logs page to see what it would do.
+3. On the Run page, choose your army ([what to bring](docs/armies.md)), set
+   **Auto upgrade → Dry run** for the first session, and press **Start**. Watch the Logs page
+   to see what it would do.
 4. Happy with its choices? Switch to **Maxer**, enable **Run until maxed**, and set
    *Settings → Reserve builders* (use 0 if your walls are maxed).
 

@@ -21,3 +21,6 @@ tesseract_bundle/
 # Local dev fixtures & offline tests: dev/frames holds real screenshots of the
 # author's village (account name visible) used as OCR ground truth — never publish.
 dev/
+
+# macOS
+.DS_Store
