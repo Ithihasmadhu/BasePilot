@@ -1,89 +1,145 @@
 # BasePilot
 
-**BasePilot** — autopilot for your Clash of Clans base: a farming and base-progression bot for **Google Play Games on PC**.
-PySide6 desktop UI, OpenCV template matching + Tesseract OCR vision, Win32 window
-capture and input. No memory reading, no packet work — it plays the game the way a
-human does: by looking at the screen and clicking.
+**Autopilot for your Clash of Clans base.** BasePilot farms, upgrades, and knows when
+to do nothing — it runs unattended until your village genuinely has nothing left to
+start, then waits for a builder to free up and gets back to work.
 
-Works at **any Town Hall level** — all detection is driven by templates, OCR, and the
-game's own UI signals (builder chip, lab chip, full-storage icons), not hardcoded
-per-TH values.
+Windows desktop app for **Clash of Clans on Google Play Games (PC)**. It plays the
+game the way a person does: screen capture, computer vision, and clicks. No memory
+reading, no packet manipulation, no modified client.
 
-## Download
+**[Download the latest release](../../releases/latest)** — a single `BasePilot.exe`
+with the OCR engine bundled in, so there is nothing to install. This repository holds
+the full source; see [Running from source](#running-from-source) to build it yourself.
 
-Grab the latest `BasePilot.exe` from the
-[Releases page](https://github.com/efebolukbasi/BasePilot/releases/latest) and run
-it — Tesseract is bundled inside, so there is nothing else to install. The exe is
-unsigned, so Windows SmartScreen warns on first launch: *More info → Run anyway*.
+![BasePilot running beside Clash of Clans: the Run page shows Maxer mode with "Run until
+maxed" enabled, and the Live Status panel reports IDLING with 0/6 builders free and both
+storages full](docs/basepilot-screenshot.png)
 
-Everything below is for running or building from source.
+*BasePilot idling on purpose: storages are capped and every builder is busy, so it holds
+position and rechecks instead of raiding for loot that would overflow.*
 
-## Features
+---
 
-- **Loot farming** — finds matches, deploys (Valkyries / Sneaky Goblins / Super
-  Minions / Edrags), collects, returns home, recovers from popups, disconnects,
-  and stray screens. Builder Base farming included.
-- **Wall upgrades** — batch-buys walls when loot passes a configurable threshold or
-  storages fill, elixir-first, never spends gems, keeps the match entry fee.
-- **Auto upgrade (beta)** — reads the builder menu with OCR and starts upgrades
-  with your loot:
-  - **Maxer**: cheapest affordable upgrade first, never the Town Hall.
-  - **Rusher**: takes the Town Hall the moment it is affordable.
-  - **Dry run**: logs what it *would* start, clicks nothing.
-- **Run until maxed** — no time limit: farm → upgrade → and when storages are full
-  with every builder busy and nothing startable, the bot **idles** and re-checks
-  every 5 minutes instead of attacking for nothing. It resumes by itself when a
-  builder frees up. Runs until you press Stop.
-- **Live status panel** — free builders, lab state, storages, session loot and
-  loot/hour, and the last upgrade decision.
-- Multi-account sessions, star-bonus collection runs, ranked attack fill.
+## What it does
 
-Not automated (yet): starting laboratory research and Pet House upgrades — the bot
-tracks the lab chip and reminds you when the lab is idle, but you start those
-yourself. Dark elixir storage has no "full" indicator in the game's UI, so idling
-keys on gold + elixir only.
+**Farming.** Finds matches, deploys your army (Valkyries, Sneaky Goblins, Super
+Minions, or Edrags), collects loot, returns home, and recovers on its own from popups,
+disconnects, and stray screens. Builder Base farming included.
+
+**Auto upgrade (beta).** Reads the builder menu with OCR and spends your loot:
+
+- **Maxer** — starts an affordable upgrade and never touches your Town Hall. Priciest
+  first by default, since a farmed account is builder-limited rather than loot-limited;
+  switch to cheapest first in *Settings → Upgrade order* to spread builders across more
+  jobs. Dark elixir upgrades (heroes) always get first claim either way.
+- **Rusher** — takes the Town Hall as soon as it's affordable.
+- **Dry run** — logs what it *would* start and clicks nothing. Good first setting.
+
+**Run until maxed.** No time limit. Farm → spend → and when storages are full with
+every builder busy, BasePilot **idles** instead of raiding for loot that would
+overflow, rechecking every few minutes and resuming the moment something frees up.
+It only stops when you tell it to.
+
+**Wall upgrades.** Batch-buys walls when loot passes a threshold you set, elixir first,
+keeping enough gold for match entry fees.
+
+**Loot tracking.** Every raid's gold, elixir, and dark elixir gains are read straight
+off the HUD and accumulated into a session total plus a **loot-per-hour rate**, so you
+can see what an army or strategy is actually earning you instead of guessing. Readings
+require agreement across consecutive frames and are sanity-checked against what a
+single raid can plausibly yield, so a bad OCR frame can't inflate your numbers. (Note
+that a capped storage banks nothing — the rate reflects real gains, not raid count.)
+
+**Live status.** Current state, free builders, laboratory, and storage levels at a
+glance, alongside the loot readout.
+
+Works at **any Town Hall level** — detection reads the game's own UI signals (builder
+chip, lab chip, storage indicators) rather than hardcoded per-TH values.
+
+Not automated yet: starting laboratory research and Pet House upgrades. BasePilot
+tracks the lab and tells you when it's idle, but you start those two yourself.
+
+## Safety rails
+
+Automation that spends resources has to be careful, so BasePilot:
+
+- Never confirms a purchase whose cost shows red (unaffordable → gem-spend risk).
+- Requires the screen to **name the building it picked** before any purchase click, so
+  a mis-aimed click can't buy the wrong thing.
+- Verifies every upgrade actually started by checking the builder counter afterward.
+- Escapes unknown dialogs via their close button or empty ground — never a blind "OK".
+- Keeps a gold buffer so matchmaking entry fees are never spent away.
+- Screenshots anything it couldn't verify to `%LOCALAPPDATA%\BasePilot\debug\` and
+  benches that upgrade instead of retrying blindly.
 
 ## Requirements
 
-- Windows, Clash of Clans running in **Google Play Games on PC** at **16:9** or
-  16:10. Ultrawide monitor? Use *Settings → Switch display to 16:9*, restart the
-  game, restore — the game keeps its aspect (GPG locks it at launch).
-- Python 3.11+ with `PySide6`, `opencv-python`, `pytesseract`, `numpy`, `pywin32`.
-- A Tesseract 5 install in `tesseract_bundle/` (not committed — copy `tesseract.exe`,
-  its DLLs and `tessdata/` from a [UB-Mannheim build](https://github.com/UB-Mannheim/tesseract/wiki)).
+- Windows 10/11
+- Clash of Clans running in **Google Play Games on PC**
+- The game rendering at **16:9** or 16:10
 
-## Running
+**Ultrawide / 21:9 monitors:** Google Play Games locks the game's aspect ratio to your
+display resolution at launch. Use *Settings → Switch display to 16:9*, fully close and
+reopen Clash, then *Restore my display* — the running game keeps 16:9.
 
-```
-python main.py
-```
+## Getting started
 
-Headless-ish autostart (used for scheduled/overnight runs):
+1. Download `BasePilot.exe` from [Releases](../../releases/latest) and run it (no
+   installer; settings live in `%LOCALAPPDATA%\BasePilot`). The exe is unsigned, so
+   Windows SmartScreen warns on first launch — *More info → Run anyway*.
+2. Open the game, then press **Test** on the Settings page to confirm BasePilot can see
+   it. Use **Auto-detect** or pick the window manually if needed.
+3. On the Run page, choose your army, set **Auto upgrade → Dry run** for the first
+   session, and press **Start**. Watch the Logs page to see what it would do.
+4. Happy with its choices? Switch to **Maxer**, enable **Run until maxed**, and set
+   *Settings → Reserve builders* (use 0 if your walls are maxed).
+
+Command line, for scheduled or overnight runs:
 
 ```
 BasePilot.exe --autostart --minutes 0 --walls --upgrades maxer
 ```
 
-`--minutes 0` = run until maxed (no time limit). `--upgrades off|dry|maxer|rusher`.
+`--minutes 0` means run until maxed. `--upgrades off|dry|maxer|rusher`.
 
-Build a one-file exe with `pyinstaller BasePilot.spec`.
+## Running from source
 
-## Safety rails
+Python 3.11+ on Windows:
 
-- Never confirms a purchase whose cost reads red (unaffordable → gem-offer risk).
-- Escapes unknown dialogs via the X / empty-ground taps, never a blind "Okay".
-- Verifies every upgrade start against the builder counter; anything unverified is
-  logged, screenshotted to `%LOCALAPPDATA%\BasePilot\debug\`, and cooled down.
-- Keeps a gold buffer so matchmaking entry fees are never spent away.
+```
+pip install -r requirements.txt
+python main.py
+```
+
+OCR needs a Tesseract 5 install. For development, BasePilot falls back to
+`C:\Program Files\Tesseract-OCR\tesseract.exe`, so a
+[UB-Mannheim build](https://github.com/UB-Mannheim/tesseract/wiki) is enough — or point
+`TESSERACT_CMD` at any `tesseract.exe` you prefer.
+
+To build the one-file exe, copy that Tesseract install (`tesseract.exe`, its DLLs, and
+`tessdata/`) into `tesseract_bundle/` and run:
+
+```
+pyinstaller BasePilot.spec
+```
+
+`tesseract_bundle/` is gitignored to keep the repo light — it is ~40 MB of Apache-2.0
+binaries. The release workflow in `.github/workflows/release.yml` recreates it on a
+Windows runner and publishes the exe automatically on every `v*` tag.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Tesseract, bundled into the released exe, ships
-under the Apache 2.0 license.
+MIT — see [LICENSE](LICENSE). Tesseract, bundled into the released exe, ships under the
+Apache 2.0 license.
 
 ## Disclaimer
 
-Automation violates Supercell's Terms of Service and can get an account banned.
-This project exists for educational purposes — computer vision, OCR, and UI
-automation on a real, adversarially animated target. Use a throwaway account, or
-don't use it at all.
+Automating Clash of Clans **violates Supercell's Terms of Service and can get your
+account banned.** BasePilot is published for educational purposes — it's a real-world
+exercise in computer vision, OCR, and UI automation against an animated, adversarial
+target. Use it on an account you're willing to lose, or don't use it at all. No
+warranty; you accept all risk.
+
+Not affiliated with, endorsed by, or associated with Supercell. Clash of Clans is a
+trademark of Supercell Oy.
