@@ -9,6 +9,15 @@ Works at **any Town Hall level** — all detection is driven by templates, OCR, 
 game's own UI signals (builder chip, lab chip, full-storage icons), not hardcoded
 per-TH values.
 
+## Download
+
+Grab the latest `BasePilot.exe` from the
+[Releases page](https://github.com/efebolukbasi/BasePilot/releases/latest) and run
+it — Tesseract is bundled inside, so there is nothing else to install. The exe is
+unsigned, so Windows SmartScreen warns on first launch: *More info → Run anyway*.
+
+Everything below is for running or building from source.
+
 ## Features
 
 - **Loot farming** — finds matches, deploys (Valkyries / Sneaky Goblins / Super
@@ -66,6 +75,11 @@ Build a one-file exe with `pyinstaller BasePilot.spec`.
 - Verifies every upgrade start against the builder counter; anything unverified is
   logged, screenshotted to `%LOCALAPPDATA%\BasePilot\debug\`, and cooled down.
 - Keeps a gold buffer so matchmaking entry fees are never spent away.
+
+## License
+
+MIT — see [LICENSE](LICENSE). Tesseract, bundled into the released exe, ships
+under the Apache 2.0 license.
 
 ## Disclaimer
 
